@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gestão AKS">
+<meta name="theme-color" content="#111827">
+<title>Gestão AKS</title>
+<style>
+  :root{
+    --bg:#f3f4f6; --surface:#ffffff; --surface-2:#f8fafc;
+    --ink:#111827; --muted:#64748b; --line:#e5e7eb;
+    --primary:#0f766e; --primary-ink:#0b5e57; --primary-soft:#ccece7;
+    --blue:#2563eb; --blue-soft:#dbeafe;
+    --amber:#b45309; --amber-soft:#fef0d9;
+    --green:#15803d; --green-soft:#dcfce7;
+    --red:#dc2626; --red-soft:#fee2e2;
+    --slate:#334155; --slate-soft:#e2e8f0;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--ui); background:var(--bg); color:var(--ink);
+    font-size:15px; line-height:1.4; -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(72px + env(safe-area-inset-bottom));
+  }
+  header{
+    position:sticky; top:0; z-index:40;
+    background:#111827; color:#fff;
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+    display:flex; align-items:center; gap:12px;
+  }
+  header .brand{font-weight:800; letter-spacing:.5px; font-size:15px}
+  header .brand span{color:#5eead4}
+  header .ttl{margin-left:auto; font-size:12px; text-transform:uppercase; letter-spacing:1.2px; color:#94a3b8}
+  header .gear{background:rgba(255,255,255,.08); border:none; color:#e2e8f0; width:34px;height:34px;border-radius:9px;font-size:16px}
+  main{max-width:720px; margin:0 auto; padding:14px 14px 24px}
+  .eyebrow{font-size:11px; text-transform:uppercase; letter-spacing:1.4px; color:var(--muted); font-weight:700; margin:2px 0 10px}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px; margin-bottom:12px}
+  .row{display:flex; align-items:center; gap:10px}
+  .between{justify-content:space-between}
+  .wrap{flex-wrap:wrap}
+  .muted{color:var(--muted)}
+  .small{font-size:12.5px}
+  .fig{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  h2.title{font-size:20px; font-weight:800; letter-spacing:-.3px; margin:2px 0 2px}
+  h3{font-size:15px; margin:0 0 4px; font-weight:700}
+  .chip{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap}
+  .c-blue{background:var(--blue-soft); color:var(--blue)}
+  .c-amber{background:var(--amber-soft); color:var(--amber)}
+  .c-green{background:var(--green-soft); color:var(--green)}
+  .c-red{background:var(--red-soft); color:var(--red)}
+  .c-slate{background:var(--slate-soft); color:var(--slate)}
+  .c-teal{background:var(--primary-soft); color:var(--primary-ink)}
+  button{font-family:var(--ui); cursor:pointer}
+  .btn{border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:11px 14px; border-radius:11px; font-weight:600; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:44px}
+  .btn:active{transform:scale(.98)}
+  .btn.primary{background:var(--primary); border-color:var(--primary); color:#fff}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:7px 11px; min-height:36px; font-size:13px; border-radius:9px}
+  .btn.block{width:100%}
+  .btn.danger{color:var(--red); border-color:var(--red-soft)}
+  .btn.wa{background:#25d366; border-color:#25d366; color:#04361a}
+  .btn-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .fab{position:fixed; right:16px; bottom:calc(84px + env(safe-area-inset-bottom)); z-index:35; background:var(--primary); color:#fff; border:none; width:56px; height:56px; border-radius:50%; font-size:28px; box-shadow:0 6px 18px rgba(15,118,110,.4)}
+  nav.tabs{position:fixed; bottom:0; left:0; right:0; z-index:40; background:rgba(255,255,255,.92); backdrop-filter:blur(12px); border-top:1px solid var(--line); display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  nav.tabs button{flex:1; background:none; border:none; color:var(--muted); font-size:10.5px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; border-radius:10px}
+  nav.tabs button .ic{font-size:20px; line-height:1}
+  nav.tabs button.active{color:var(--primary)}
+  label.f{display:block; font-size:12px; font-weight:700; color:var(--slate); margin:10px 0 5px; text-transform:uppercase; letter-spacing:.5px}
+  input,select,textarea{width:100%; font-family:var(--ui); font-size:16px; padding:11px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--primary-soft); border-color:var(--primary)}
+  textarea{min-height:70px; resize:vertical}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .checks{display:flex; flex-wrap:wrap; gap:7px; margin-top:4px}
+  .checks label{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; background:var(--surface-2); border:1px solid var(--line); padding:8px 11px; border-radius:9px; text-transform:none; letter-spacing:0; margin:0; color:var(--ink)}
+  .checks input{width:auto}
+  .overlay{position:fixed; inset:0; z-index:60; background:var(--bg); overflow-y:auto; -webkit-overflow-scrolling:touch}
+  .overlay .obar{position:sticky; top:0; background:#111827; color:#fff; display:flex; align-items:center; gap:12px; padding:calc(env(safe-area-inset-top) + 12px) 14px 12px; z-index:2}
+  .overlay .obar h3{color:#fff; margin:0; flex:1}
+  .overlay .obar button{background:none; border:none; color:#e2e8f0; font-size:15px; font-weight:600}
+  .overlay .obody{max-width:720px; margin:0 auto; padding:14px 14px 120px}
+  .savebar{position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--line); padding:12px 14px calc(12px + env(safe-area-inset-bottom)); z-index:61; max-width:720px; margin:0 auto}
+  .del-x{background:var(--red-soft); color:var(--red); border:none; border-radius:8px; height:40px; font-size:18px}
+  .flow{display:flex; align-items:stretch; gap:6px; overflow-x:auto; padding-bottom:4px}
+  .flow .step{flex:1; min-width:78px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 8px; text-align:center}
+  .flow .step .n{font-family:var(--mono); font-size:22px; font-weight:700; color:var(--primary)}
+  .flow .step .l{font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); font-weight:700; margin-top:2px}
+  .flow .arw{display:flex; align-items:center; color:var(--line); font-size:18px}
+  .alertbox{border-left:4px solid var(--amber); background:var(--amber-soft); color:#7c3f04; border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13.5px}
+  .alertbox.red{border-color:var(--red); background:var(--red-soft); color:#991b1b}
+  .alertbox.blue{border-color:var(--blue); background:var(--blue-soft); color:#1e40af}
+  .empty{text-align:center; color:var(--muted); padding:34px 12px; font-size:14px}
+  .empty .big{font-size:40px; margin-bottom:8px}
+  .divide{height:1px; background:var(--line); margin:10px 0}
+  .kv{display:flex; justify-content:space-between; font-size:13.5px; padding:3px 0}
+  .kv .k{color:var(--muted)}
+  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(96px + env(safe-area-inset-bottom)); background:#111827; color:#fff; padding:10px 16px; border-radius:10px; font-size:13.5px; z-index:80; box-shadow:0 6px 20px rgba(0,0,0,.3); max-width:90%}
+  .seg{display:flex; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:3px; gap:3px; margin-bottom:10px}
+  .seg button{flex:1; border:none; background:none; padding:8px; font-size:12.5px; font-weight:700; color:var(--muted); border-radius:8px}
+  .seg button.on{background:var(--surface); color:var(--primary); box-shadow:var(--shadow)}
+  progress{width:100%; height:8px; border-radius:6px; overflow:hidden; -webkit-appearance:none; appearance:none}
+  progress::-webkit-progress-bar{background:var(--line); border-radius:6px}
+  progress::-webkit-progress-value{background:var(--primary); border-radius:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">GRUPO <span>AKS</span></div>
+  <div class="ttl" id="hdrTitle">Início</div>
+  <button class="gear" onclick="App.openSettings()" aria-label="Configurações">&#9881;</button>
+</header>
+
+<main id="view"></main>
+
+<button class="fab" id="fab" onclick="App.fabAction()" aria-label="Adicionar">+</button>
+
+<nav class="tabs">
+  <button data-tab="home"    class="active" onclick="App.go('home')"><span class="ic">&#9707;</span>Início</button>
+  <button data-tab="visitas" onclick="App.go('visitas')"><span class="ic">&#9678;</span>Visitas</button>
+  <button data-tab="orcamentos" onclick="App.go('orcamentos')"><span class="ic">&#9636;</span>Propostas</button>
+  <button data-tab="obras"   onclick="App.go('obras')"><span class="ic">&#9965;</span>Obras</button>
+</nav>
+
+<div id="overlayRoot"></div>
+
+<script>
+/* ===== STORE ===== */
+const KEY='gestao_aks_v1';
+const uid=()=> Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const defaults=()=>({
+  empresa:{nome:'KVAR Automattic — Grupo AKS', resp:'Eng. Euclides Viana — CREA-PA 17184 D', tel:''},
+  colaboradores:[],
+  visitas:[], orcamentos:[], obras:[]
+});
+let DB=load();
+function load(){ try{const r=JSON.parse(localStorage.getItem(KEY)); return r?{...defaults(),...r}:defaults();}catch(e){return defaults();} }
+function save(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+
+/* ===== HELPERS ===== */
+function fmtDate(d){ if(!d) return '—'; const p=d.split('-'); return p.length===3? p[2]+'/'+p[1]+'/'+p[0]:d; }
+function fmtDateTime(d,t){ return fmtDate(d)+(t?' '+t:''); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function daysLeft(iso){ if(!iso) return null; const a=new Date(iso+'T23:59:59'); const b=new Date(); return Math.ceil((a-b)/86400000); }
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
+function waNumber(tel){ let n=(tel||'').replace(/\D/g,''); if(n.length && n.length<=11) n='55'+n; return n; }
+
+/* ===== STATE ===== */
+let TAB='home';
+let filters={orc:'todos'};
+
+/* ===== APP ===== */
+const App={
+  go(t){ TAB=t; document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t)); document.getElementById('hdrTitle').textContent=({home:'Início',visitas:'Visitas',orcamentos:'Propostas',obras:'Obras'})[t]; document.getElementById('fab').style.display= t==='home'?'none':'flex'; render(); window.scrollTo(0,0); },
+  fabAction(){ if(TAB==='visitas') this.editVisita(); else if(TAB==='orcamentos') this.editOrc(); else if(TAB==='obras') this.editObra(); },
+
+  /* --- VISITAS --- */
+  editVisita(id){
+    const v = id? DB.visitas.find(x=>x.id===id) : {id:uid(), cliente:'',endereco:'',contato:'',data:todayISO(),hora:'08:00',responsavel:DB.empresa.resp||'',colab:[],alarme:60,obs:'',status:'Agendada',notified:false, _new:!id};
+    openEditor('Visita técnica', renderVisitaForm(v), ()=>{
+      readVisitaForm(v);
+      if(!v.cliente){ toast('Informe o cliente'); return false; }
+      const i=DB.visitas.findIndex(x=>x.id===v.id);
+      if(i>=0) DB.visitas[i]=v; else DB.visitas.unshift(v);
+      save(); toast('Visita salva'); return true;
+    });
+  },
+  setVisitaStatus(id,st){ const v=DB.visitas.find(x=>x.id===id); if(!v)return; v.status=st; save(); render(); },
+  gerarProposta(id){
+    const v=DB.visitas.find(x=>x.id===id); if(!v)return;
+    const o={id:uid(),numero:nextOrcNum(),cliente:v.cliente,endereco:v.endereco,contato:v.contato,origemVisita:v.id,
+      descricao:'A partir da visita técnica de '+fmtDate(v.data),
+      itens:[], status:'Proposta gerada', dataRetorno:'',dataAprov:'', criado:todayISO()};
+    DB.orcamentos.unshift(o); save();
+    toast('Proposta gerada'); this.go('orcamentos'); setTimeout(()=>this.editOrc(o.id),200);
+  },
+  avisarWhats(id){
+    const v=DB.visitas.find(x=>x.id===id); if(!v)return;
+    openEditor('Avisar colaboradores', renderAvisoView(v), null, 'Fechar');
+  },
+
+  /* --- PROPOSTAS --- */
+  editOrc(id){
+    const o = id? DB.orcamentos.find(x=>x.id===id) : {id:uid(),numero:nextOrcNum(),cliente:'',endereco:'',contato:'',descricao:'',itens:[],status:'Proposta gerada',dataRetorno:'',dataAprov:'',criado:todayISO(),_new:!id};
+    openEditor('Proposta '+ (o.numero||''), renderOrcForm(o), ()=>{
+      readOrcForm(o);
+      if(!o.cliente){ toast('Informe o cliente'); return false; }
+      const i=DB.orcamentos.findIndex(x=>x.id===o.id);
+      if(i>=0) DB.orcamentos[i]=o; else DB.orcamentos.unshift(o);
+      save(); toast('Proposta salva'); return true;
+    });
+  },
+  setOrcStatus(id,st){
+    const o=DB.orcamentos.find(x=>x.id===id); if(!o)return;
+    o.status=st;
+    if(st==='Aguardando retorno' && !o.dataRetorno) o.dataRetorno=todayISO();
+    if(st==='Aprovado' && !o.dataAprov) o.dataAprov=todayISO();
+    save(); render();
+  },
+  gerarObra(id){
+    const o=DB.orcamentos.find(x=>x.id===id); if(!o)return;
+    if(DB.obras.some(b=>b.orcamento===o.id)){ toast('Já existe obra desta proposta'); this.go('obras'); return; }
+    const ob={id:uid(),orcamento:o.id,cliente:o.cliente,descricao:o.descricao||('Execução — Prop '+o.numero),
+      inicio:todayISO(), prazo:'', colab:[], status:'Planejada',
+      pendencias:(o.itens||[]).filter(it=>it.d).map(it=>({t:it.d,ok:false})),
+      medicoes:[], criado:todayISO()};
+    DB.obras.unshift(ob); save();
+    toast('Obra enviada para manutenção'); this.go('obras'); setTimeout(()=>this.editObra(ob.id),200);
+  },
+
+  /* --- OBRAS --- */
+  editObra(id){
+    const o = id? DB.obras.find(x=>x.id===id) : {id:uid(),cliente:'',descricao:'',inicio:todayISO(),prazo:'',colab:[],status:'Planejada',pendencias:[],medicoes:[],criado:todayISO(),_new:!id};
+    openEditor('Obra', renderObraForm(o), ()=>{
+      readObraForm(o);
+      if(!o.cliente){ toast('Informe o cliente'); return false; }
+      const i=DB.obras.findIndex(x=>x.id===o.id);
+      if(i>=0) DB.obras[i]=o; else DB.obras.unshift(o);
+      save(); toast('Obra salva'); return true;
+    });
+  },
+  setObraStatus(id,st){ const o=DB.obras.find(x=>x.id===id); if(!o)return; o.status=st; save(); render(); },
+  togglePend(oid,i){ const o=DB.obras.find(x=>x.id===oid); if(!o)return; o.pendencias[i].ok=!o.pendencias[i].ok; save(); render(); },
+  addMedicao(id){
+    const o=DB.obras.find(x=>x.id===id); if(!o)return;
+    const p=prompt('% executado nesta medição (0-100):','');
+    if(p===null)return; const pc=Math.max(0,Math.min(100,parseFloat(p)||0));
+    const nota=prompt('Observação da medição (opcional):','')||'';
+    o.medicoes.unshift({data:todayISO(),pc,nota});
+    if(pc>=100) o.status='Concluída'; else if(o.status==='Planejada') o.status='Em andamento';
+    save(); render();
+  },
+
+  /* --- SETTINGS --- */
+  openSettings(){ openEditor('Configurações', renderSettings(), ()=>{ readSettings(); save(); toast('Configurações salvas'); return true; }); },
+  addColab(){ readSettings(); DB.colaboradores.push({id:uid(),nome:'',tel:''}); refreshEditorBody(renderSettings()); },
+  delColab(i){ readSettings(); DB.colaboradores.splice(i,1); refreshEditorBody(renderSettings()); },
+  exportData(){ const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='backup_aks_'+todayISO()+'.json'; a.click(); },
+  importData(){ const inp=document.createElement('input'); inp.type='file'; inp.accept='.json'; inp.onchange=e=>{ const f=e.target.files[0]; const r=new FileReader(); r.onload=()=>{ try{DB={...defaults(),...JSON.parse(r.result)}; save(); closeEditor(); render(); toast('Dados importados');}catch(x){toast('Arquivo inválido');} }; r.readAsText(f); }; inp.click(); },
+  reqNotify(){ if('Notification' in window) Notification.requestPermission().then(p=>toast(p==='granted'?'Alarmes ativados':'Permissão negada')); }
+};
+window.App=App;
+
+/* ===== UTIL CALC ===== */
+function nextOrcNum(){ const yr=new Date().getFullYear(); const n=DB.orcamentos.filter(o=>(o.numero||'').includes('/'+yr)).length+1; return String(n).padStart(3,'0')+'/'+yr; }
+function obraProgress(o){
+  if(o.medicoes && o.medicoes.length) return o.medicoes[0].pc;
+  if(o.pendencias && o.pendencias.length){ const done=o.pendencias.filter(p=>p.ok).length; return Math.round(done/o.pendencias.length*100); }
+  return 0;
+}
+
+/* ===== CHIPS ===== */
+function orcChip(s){ const m={'Proposta gerada':'c-slate','Aguardando retorno':'c-amber','Aprovado':'c-green','Reprovado':'c-red'}; return '<span class="chip '+(m[s]||'c-slate')+'">'+s+'</span>'; }
+function visitaChip(s){ const m={'Agendada':'c-blue','Realizada':'c-green','Cancelada':'c-red'}; return '<span class="chip '+(m[s]||'c-slate')+'">'+s+'</span>'; }
+function obraChip(s){ const m={'Planejada':'c-slate','Em andamento':'c-amber','Concluída':'c-green'}; return '<span class="chip '+(m[s]||'c-slate')+'">'+s+'</span>'; }
+
+/* ===== ROUTER ===== */
+function render(){
+  const v=document.getElementById('view');
+  if(TAB==='home') v.innerHTML=renderHome();
+  else if(TAB==='visitas') v.innerHTML=renderVisitas();
+  else if(TAB==='orcamentos') v.innerHTML=renderOrcamentos();
+  else if(TAB==='obras') v.innerHTML=renderObras();
+}
+
+/* ===== HOME ===== */
+function renderHome(){
+  const nVis=DB.visitas.filter(v=>v.status==='Agendada').length;
+  const nProp=DB.orcamentos.filter(o=>o.status==='Proposta gerada').length;
+  const nAguard=DB.orcamentos.filter(o=>o.status==='Aguardando retorno').length;
+  const nAprov=DB.orcamentos.filter(o=>o.status==='Aprovado').length;
+  const nObras=DB.obras.filter(o=>o.status!=='Concluída').length;
+
+  let alerts='';
+  const prox=DB.visitas.filter(v=>v.status==='Agendada' && daysLeft(v.data)!==null && daysLeft(v.data)<=1).sort((a,b)=>a.data.localeCompare(b.data));
+  prox.forEach(v=>{ const dl=daysLeft(v.data); alerts+='<div class="alertbox blue" onclick="App.go(\'visitas\')">&#9678; Visita '+(dl<=0?'HOJE':'amanhã')+' — <b>'+esc(v.cliente)+'</b> às '+(v.hora||'')+'</div>'; });
+  DB.orcamentos.filter(o=>o.status==='Aguardando retorno').forEach(o=>{ alerts+='<div class="alertbox" onclick="App.go(\'orcamentos\')">&#9636; Proposta '+o.numero+' aguardando retorno — '+esc(o.cliente)+'</div>'; });
+  DB.obras.filter(o=>o.status!=='Concluída' && o.prazo).forEach(o=>{ const dl=daysLeft(o.prazo); if(dl!==null && dl<0) alerts+='<div class="alertbox red" onclick="App.go(\'obras\')">&#9965; Obra ATRASADA — '+esc(o.cliente)+' ('+(-dl)+'d)</div>'; else if(dl!==null && dl<=2) alerts+='<div class="alertbox" onclick="App.go(\'obras\')">&#9965; Obra vence em '+dl+'d — '+esc(o.cliente)+'</div>'; });
+  if(!alerts) alerts='<div class="alertbox blue">Sem pendências urgentes. Tudo em dia &#10003;</div>';
+
+  return ''+
+  '<div class="eyebrow">Fluxo de trabalho</div>'+
+  '<div class="card"><div class="flow">'+
+    '<div class="step" onclick="App.go(\'visitas\')"><div class="n">'+nVis+'</div><div class="l">Visitas</div></div>'+
+    '<div class="arw">&#8594;</div>'+
+    '<div class="step" onclick="App.go(\'orcamentos\')"><div class="n">'+nProp+'</div><div class="l">Propostas</div></div>'+
+    '<div class="arw">&#8594;</div>'+
+    '<div class="step" onclick="App.go(\'orcamentos\')"><div class="n">'+nAguard+'</div><div class="l">Ag. retorno</div></div>'+
+    '<div class="arw">&#8594;</div>'+
+    '<div class="step" onclick="App.go(\'obras\')"><div class="n">'+nObras+'</div><div class="l">Obras</div></div>'+
+  '</div></div>'+
+  '<div class="eyebrow">Alertas</div>'+alerts+
+  '<div class="eyebrow" style="margin-top:16px">Resumo</div>'+
+  '<div class="card">'+
+    '<div class="kv"><span class="k">Propostas aguardando retorno</span><b>'+nAguard+'</b></div>'+
+    '<div class="kv"><span class="k">Aprovadas a executar</span><b style="color:var(--green)">'+nAprov+'</b></div>'+
+    '<div class="kv"><span class="k">Obras em andamento</span><b>'+nObras+'</b></div>'+
+  '</div>';
+}
+
+/* ===== VISITAS ===== */
+function renderVisitas(){
+  const list=[...DB.visitas].sort((a,b)=> (a.data+a.hora).localeCompare(b.data+b.hora));
+  if(!list.length) return emptyState('&#9678;','Nenhuma visita','Toque em + para agendar uma visita técnica.');
+  return '<div class="eyebrow">'+list.length+' visita(s)</div>' + list.map(v=>{
+    const dl=daysLeft(v.data);
+    const soon = v.status==='Agendada' && dl!==null && dl<=1;
+    return '<div class="card">'+
+      '<div class="row between"><div><h3>'+esc(v.cliente)+'</h3><div class="small muted">'+esc(v.endereco||'')+'</div></div>'+visitaChip(v.status)+'</div>'+
+      '<div class="row wrap small muted" style="margin-top:8px; gap:14px">'+
+        '<span>&#128197; '+fmtDateTime(v.data,v.hora)+(soon?' <b style="color:var(--blue)">• próxima</b>':'')+'</span>'+
+        (v.colab&&v.colab.length?'<span>&#128101; '+v.colab.length+'</span>':'')+
+      '</div>'+
+      (v.obs?'<div class="small" style="margin-top:6px">'+esc(v.obs)+'</div>':'')+
+      '<div class="divide"></div>'+
+      '<div class="row wrap" style="gap:7px">'+
+        (v.status==='Agendada'?'<button class="btn wa sm" onclick="App.avisarWhats(\''+v.id+'\')">Avisar equipe</button>':'')+
+        (v.status==='Agendada'?'<button class="btn sm" onclick="App.setVisitaStatus(\''+v.id+'\',\'Realizada\')">&#10003; Realizada</button>':'')+
+        (v.status==='Realizada'?'<button class="btn primary sm" onclick="App.gerarProposta(\''+v.id+'\')">Gerar proposta &#8594;</button>':'')+
+        '<button class="btn ghost sm" onclick="App.editVisita(\''+v.id+'\')">Editar</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function renderVisitaForm(v){
+  const colOpts=DB.colaboradores.length? DB.colaboradores.map(c=>'<label><input type="checkbox" class="vcol" value="'+c.id+'" '+(v.colab.includes(c.id)?'checked':'')+'>'+esc(c.nome||'(sem nome)')+'</label>').join('')
+    : '<div class="small muted">Cadastre colaboradores em &#9881; Configurações para atribuir e avisar via WhatsApp.</div>';
+  return ''+
+  '<label class="f">Cliente</label><input id="v_cli" value="'+esc(v.cliente)+'" placeholder="Nome do cliente / obra">'+
+  '<label class="f">Endereço</label><input id="v_end" value="'+esc(v.endereco)+'" placeholder="Local da visita">'+
+  '<label class="f">Contato (telefone)</label><input id="v_con" value="'+esc(v.contato)+'" inputmode="tel" placeholder="(91) 9....">'+
+  '<div class="grid2"><div><label class="f">Data</label><input id="v_data" type="date" value="'+v.data+'"></div>'+
+  '<div><label class="f">Hora</label><input id="v_hora" type="time" value="'+v.hora+'"></div></div>'+
+  '<label class="f">Responsável técnico</label><input id="v_resp" value="'+esc(v.responsavel)+'">'+
+  '<label class="f">Alarme (min antes)</label><input id="v_alarme" type="number" value="'+v.alarme+'" inputmode="numeric">'+
+  '<label class="f">Colaboradores</label><div class="checks">'+colOpts+'</div>'+
+  '<label class="f">Observações</label><textarea id="v_obs" placeholder="Escopo, materiais, o que verificar...">'+esc(v.obs)+'</textarea>'+
+  (!v._new?'<label class="f">Status</label><select id="v_status">'+['Agendada','Realizada','Cancelada'].map(s=>'<option '+(v.status===s?'selected':'')+'>'+s+'</option>').join('')+'</select>':'')+
+  '<div class="divide"></div>'+
+  '<button class="btn danger block sm" onclick="if(confirm(\'Excluir visita?\')){DB.visitas=DB.visitas.filter(x=>x.id!==\''+v.id+'\');save();closeEditor();render();}" '+(v._new?'style="display:none"':'')+'>Excluir visita</button>';
+}
+function readVisitaForm(v){
+  v.cliente=val('v_cli'); v.endereco=val('v_end'); v.contato=val('v_con');
+  v.data=val('v_data'); v.hora=val('v_hora'); v.responsavel=val('v_resp');
+  v.alarme=parseInt(val('v_alarme'))||0; v.obs=val('v_obs');
+  v.colab=[...document.querySelectorAll('.vcol:checked')].map(c=>c.value);
+  const st=document.getElementById('v_status'); if(st) v.status=st.value;
+  v.notified=false; delete v._new;
+}
+function renderAvisoView(v){
+  const msg = '*Visita Técnica — Grupo AKS*\n'+
+    'Cliente: '+v.cliente+'\n'+
+    (v.endereco?'Local: '+v.endereco+'\n':'')+
+    'Data: '+fmtDate(v.data)+' às '+v.hora+'\n'+
+    'Responsável: '+(v.responsavel||'-')+'\n'+
+    (v.obs?'Obs: '+v.obs:'');
+  const enc=encodeURIComponent(msg);
+  const alvos = v.colab.map(id=>DB.colaboradores.find(c=>c.id===id)).filter(Boolean);
+  let botoes = alvos.length? alvos.map(c=>{
+    const n=waNumber(c.tel);
+    return '<div class="row between card" style="margin:0 0 8px"><div><b>'+esc(c.nome)+'</b><div class="small muted">'+esc(c.tel||'sem telefone')+'</div></div>'+
+      (n?'<a class="btn wa sm" href="https://wa.me/'+n+'?text='+enc+'" target="_blank" rel="noopener">WhatsApp</a>':'<span class="small muted">—</span>')+'</div>';
+  }).join('') : '<div class="alertbox">Nenhum colaborador com telefone atribuído a esta visita.</div>';
+  return ''+
+  '<div class="eyebrow">Mensagem</div>'+
+  '<div class="card small" style="white-space:pre-wrap">'+esc(msg)+'</div>'+
+  '<button class="btn block sm" onclick="navigator.clipboard.writeText(this.dataset.m).then(()=>toast(\'Mensagem copiada\'))" data-m="'+esc(msg)+'">Copiar mensagem</button>'+
+  '<div class="eyebrow" style="margin-top:14px">Enviar para</div>'+botoes+
+  '<a class="btn block sm" style="margin-top:6px" href="https://t.me/share/url?url='+encodeURIComponent('AKS')+'&text='+enc+'" target="_blank" rel="noopener">Compartilhar no Telegram</a>'+
+  '<div class="alertbox" style="margin-top:12px">Para <b>alarme automático agendado</b> (Telegram/WhatsApp sem abrir o app), é preciso o worker no seu VPS — posso montar em seguida.</div>';
+}
+
+/* ===== PROPOSTAS ===== */
+function renderOrcamentos(){
+  const f=filters.orc;
+  const seg=['todos','Proposta gerada','Aguardando retorno','Aprovado'];
+  const segLbl={'todos':'Todas','Proposta gerada':'Geradas','Aguardando retorno':'Ag. retorno','Aprovado':'Aprovadas'};
+  let list=[...DB.orcamentos];
+  if(f!=='todos') list=list.filter(o=> o.status===f);
+  const segHtml='<div class="seg">'+seg.map(s=>'<button class="'+(filters.orc===s?'on':'')+'" onclick="filters.orc=\''+s+'\';render()">'+segLbl[s]+'</button>').join('')+'</div>';
+  if(!DB.orcamentos.length) return emptyState('&#9636;','Nenhuma proposta','Toque em + para criar, ou gere a partir de uma visita.');
+  const cards = list.length? list.map(o=>{
+    const nItens=(o.itens||[]).filter(i=>i.d).length;
+    return '<div class="card">'+
+      '<div class="row between"><div><h3>'+esc(o.cliente)+'</h3><div class="small muted">Nº '+o.numero+(nItens?' · '+nItens+' item(ns) de escopo':'')+'</div></div>'+orcChip(o.status)+'</div>'+
+      (o.descricao?'<div class="small" style="margin-top:6px">'+esc(o.descricao)+'</div>':'')+
+      '<div class="row wrap small muted" style="margin-top:8px; gap:12px">'+
+        (o.dataRetorno?'<span>&#128228; apresentada '+fmtDate(o.dataRetorno)+'</span>':'')+
+        (o.dataAprov?'<span>&#9989; '+fmtDate(o.dataAprov)+'</span>':'')+
+      '</div>'+
+      '<div class="divide"></div>'+
+      '<div class="row wrap" style="gap:7px">'+orcActions(o)+
+        '<button class="btn ghost sm" onclick="App.editOrc(\''+o.id+'\')">Editar</button>'+
+      '</div>'+
+    '</div>';
+  }).join('') : '<div class="empty">Nenhuma proposta neste filtro.</div>';
+  return segHtml+cards;
+}
+function orcActions(o){
+  if(o.status==='Proposta gerada') return '<button class="btn primary sm" onclick="App.setOrcStatus(\''+o.id+'\',\'Aguardando retorno\')">&#128228; Apresentada / aguardando retorno</button>';
+  if(o.status==='Aguardando retorno') return '<button class="btn sm" style="color:var(--green);border-color:var(--green-soft)" onclick="App.setOrcStatus(\''+o.id+'\',\'Aprovado\')">&#9989; Aprovada</button><button class="btn sm danger" onclick="App.setOrcStatus(\''+o.id+'\',\'Reprovado\')">&#10005; Reprovada</button>';
+  if(o.status==='Aprovado') return '<button class="btn primary sm" onclick="App.gerarObra(\''+o.id+'\')">Enviar p/ manutenção &#8594;</button>';
+  if(o.status==='Reprovado') return '<button class="btn sm" onclick="App.setOrcStatus(\''+o.id+'\',\'Aguardando retorno\')">&#8635; Reabrir</button>';
+  return '';
+}
+function renderOrcForm(o){
+  const escopo=(o.itens||[]).map(i=>i.d).filter(Boolean).join('\n');
+  return ''+
+  '<label class="f">Cliente</label><input id="o_cli" value="'+esc(o.cliente)+'">'+
+  '<label class="f">Endereço / obra</label><input id="o_end" value="'+esc(o.endereco)+'">'+
+  '<label class="f">Descrição</label><textarea id="o_desc" placeholder="Resumo da proposta">'+esc(o.descricao)+'</textarea>'+
+  '<label class="f">Escopo / itens (uma linha por serviço)</label>'+
+  '<textarea id="o_escopo" placeholder="Ex.: Substituição de disjuntor&#10;Ensaio de isolação&#10;Adequação NR-10">'+esc(escopo)+'</textarea>'+
+  '<div class="small muted" style="margin-top:6px">Cada linha vira uma pendência quando a obra for para a manutenção.</div>'+
+  (!o._new?'<label class="f" style="margin-top:14px">Status</label><select id="o_status">'+['Proposta gerada','Aguardando retorno','Aprovado','Reprovado'].map(s=>'<option '+(o.status===s?'selected':'')+'>'+s+'</option>').join('')+'</select>':'')+
+  '<div class="divide"></div>'+
+  '<button class="btn danger block sm" onclick="if(confirm(\'Excluir proposta?\')){DB.orcamentos=DB.orcamentos.filter(x=>x.id!==\''+o.id+'\');save();closeEditor();render();}" '+(o._new?'style="display:none"':'')+'>Excluir proposta</button>';
+}
+function readOrcForm(o){
+  o.cliente=val('o_cli'); o.endereco=val('o_end'); o.descricao=val('o_desc');
+  o.itens=val('o_escopo').split('\n').map(s=>s.trim()).filter(Boolean).map(d=>({d}));
+  const st=document.getElementById('o_status'); if(st) o.status=st.value;
+  delete o._new;
+}
+
+/* ===== OBRAS ===== */
+function renderObras(){
+  if(!DB.obras.length) return emptyState('&#9965;','Nenhuma obra','Aprove uma proposta para enviar à manutenção, ou toque em +.');
+  const list=[...DB.obras].sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999'));
+  return '<div class="eyebrow">'+list.length+' obra(s)</div>'+list.map(o=>{
+    const pc=obraProgress(o); const dl=o.prazo?daysLeft(o.prazo):null;
+    const atrasada=o.status!=='Concluída' && dl!==null && dl<0;
+    const pend=o.pendencias||[];
+    return '<div class="card">'+
+      '<div class="row between"><div><h3>'+esc(o.cliente)+'</h3><div class="small muted">'+esc(o.descricao||'')+'</div></div>'+obraChip(o.status)+'</div>'+
+      '<div class="row between small muted" style="margin-top:8px"><span>&#128197; '+fmtDate(o.inicio)+' &#8594; '+(o.prazo?fmtDate(o.prazo):'sem prazo')+'</span>'+
+        (dl!==null?'<span style="color:'+(atrasada?'var(--red)':dl<=2?'var(--amber)':'var(--muted)')+';font-weight:700">'+(atrasada?(-dl)+'d atraso':dl+'d restantes')+'</span>':'')+'</div>'+
+      '<div style="margin-top:8px"><progress value="'+pc+'" max="100"></progress><div class="row between small muted"><span>'+pc+'% executado</span></div></div>'+
+      (pend.length?'<div class="divide"></div><div class="eyebrow" style="margin:0 0 6px">Pendências</div>'+pend.map((p,i)=>'<label class="row" style="gap:9px;padding:4px 0;font-size:13.5px"><input type="checkbox" style="width:auto" '+(p.ok?'checked':'')+' onchange="App.togglePend(\''+o.id+'\','+i+')"><span style="'+(p.ok?'text-decoration:line-through;color:var(--muted)':'')+'">'+esc(p.t)+'</span></label>').join(''):'')+
+      (o.medicoes&&o.medicoes.length?'<div class="divide"></div><div class="small muted">Última medição '+fmtDate(o.medicoes[0].data)+': '+o.medicoes[0].pc+'% '+(o.medicoes[0].nota?'· '+esc(o.medicoes[0].nota):'')+'</div>':'')+
+      '<div class="divide"></div>'+
+      '<div class="row wrap" style="gap:7px">'+
+        '<button class="btn primary sm" onclick="App.addMedicao(\''+o.id+'\')">+ Medição</button>'+
+        (o.status==='Planejada'?'<button class="btn sm" onclick="App.setObraStatus(\''+o.id+'\',\'Em andamento\')">&#9654; Iniciar</button>':'')+
+        (o.status!=='Concluída'?'<button class="btn sm" style="color:var(--green);border-color:var(--green-soft)" onclick="App.setObraStatus(\''+o.id+'\',\'Concluída\')">&#10003; Concluir</button>':'')+
+        '<button class="btn ghost sm" onclick="App.editObra(\''+o.id+'\')">Editar</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function renderObraForm(o){
+  const colOpts=DB.colaboradores.length? DB.colaboradores.map(c=>'<label><input type="checkbox" class="ocol" value="'+c.id+'" '+(o.colab.includes(c.id)?'checked':'')+'>'+esc(c.nome||'(sem nome)')+'</label>').join('') : '<div class="small muted">Cadastre a equipe em &#9881; Configurações.</div>';
+  return ''+
+  '<label class="f">Cliente</label><input id="b_cli" value="'+esc(o.cliente)+'">'+
+  '<label class="f">Descrição da obra</label><textarea id="b_desc">'+esc(o.descricao)+'</textarea>'+
+  '<div class="grid2"><div><label class="f">Início</label><input id="b_ini" type="date" value="'+o.inicio+'"></div>'+
+  '<div><label class="f">Prazo (fim)</label><input id="b_fim" type="date" value="'+(o.prazo||'')+'"></div></div>'+
+  '<label class="f">Equipe de manutenção</label><div class="checks">'+colOpts+'</div>'+
+  '<label class="f">Pendências (uma por linha)</label>'+
+  '<textarea id="b_pend" placeholder="Ex.: Passagem de cabo&#10;Ensaio de isolação&#10;Comissionamento">'+(o.pendencias||[]).map(p=>p.t).join('\n')+'</textarea>'+
+  '<div class="divide"></div>'+
+  '<button class="btn danger block sm" onclick="if(confirm(\'Excluir obra?\')){DB.obras=DB.obras.filter(x=>x.id!==\''+o.id+'\');save();closeEditor();render();}" '+(o._new?'style="display:none"':'')+'>Excluir obra</button>';
+}
+function readObraForm(o){
+  o.cliente=val('b_cli'); o.descricao=val('b_desc');
+  o.inicio=val('b_ini'); o.prazo=val('b_fim');
+  o.colab=[...document.querySelectorAll('.ocol:checked')].map(c=>c.value);
+  const lines=val('b_pend').split('\n').map(s=>s.trim()).filter(Boolean);
+  const old=o.pendencias||[];
+  o.pendencias=lines.map(t=>{ const ex=old.find(p=>p.t===t); return {t, ok:ex?ex.ok:false}; });
+  delete o._new;
+}
+
+/* ===== SETTINGS ===== */
+function renderSettings(){
+  const cols=DB.colaboradores.map((c,i)=>
+    '<div class="grid2" style="margin-bottom:6px; grid-template-columns:1fr 1fr auto; gap:6px; align-items:end">'+
+      '<div><label class="f">Nome</label><input class="col-nome" data-i="'+i+'" value="'+esc(c.nome)+'"></div>'+
+      '<div><label class="f">WhatsApp</label><input class="col-tel" data-i="'+i+'" value="'+esc(c.tel)+'" inputmode="tel" placeholder="91 9...."></div>'+
+      '<button class="del-x" style="height:44px;width:44px" onclick="App.delColab('+i+')">&#215;</button>'+
+    '</div>').join('');
+  return ''+
+  '<div class="eyebrow">Empresa</div>'+
+  '<label class="f">Nome</label><input id="s_nome" value="'+esc(DB.empresa.nome)+'">'+
+  '<label class="f">Responsável técnico</label><input id="s_resp" value="'+esc(DB.empresa.resp)+'">'+
+  '<label class="f">Telefone</label><input id="s_tel" value="'+esc(DB.empresa.tel)+'">'+
+  '<div class="eyebrow" style="margin-top:16px">Colaboradores</div>'+
+  (cols||'<div class="small muted">Nenhum colaborador ainda.</div>')+
+  '<button class="btn ghost sm block" onclick="App.addColab()">+ Colaborador</button>'+
+  '<div class="eyebrow" style="margin-top:16px">Alarmes</div>'+
+  '<button class="btn sm block" onclick="App.reqNotify()">Ativar notificações de visita</button>'+
+  '<div class="small muted" style="margin-top:6px">Alarmes disparam enquanto o app estiver aberto. Push automático em segundo plano precisa do worker no VPS.</div>'+
+  '<div class="eyebrow" style="margin-top:16px">Dados</div>'+
+  '<div class="btn-grid"><button class="btn sm" onclick="App.exportData()">Exportar backup</button><button class="btn sm" onclick="App.importData()">Importar backup</button></div>';
+}
+function readSettings(){
+  DB.empresa.nome=val('s_nome'); DB.empresa.resp=val('s_resp'); DB.empresa.tel=val('s_tel');
+  document.querySelectorAll('.col-nome').forEach(el=>{ const i=+el.dataset.i; if(DB.colaboradores[i]) DB.colaboradores[i].nome=el.value; });
+  document.querySelectorAll('.col-tel').forEach(el=>{ const i=+el.dataset.i; if(DB.colaboradores[i]) DB.colaboradores[i].tel=el.value; });
+}
+
+/* ===== EDITOR OVERLAY ===== */
+let editorSave=null;
+function openEditor(title, bodyHtml, onSave, saveLabel){
+  editorSave=onSave;
+  const root=document.getElementById('overlayRoot');
+  root.innerHTML='<div class="overlay">'+
+    '<div class="obar"><button onclick="closeEditor()">Cancelar</button><h3>'+esc(title)+'</h3><span style="width:64px"></span></div>'+
+    '<div class="obody" id="editorBody">'+bodyHtml+'</div>'+
+    (onSave?'<div class="savebar"><button class="btn primary block" onclick="commitEditor()">Salvar</button></div>':'<div class="savebar"><button class="btn block" onclick="closeEditor()">'+(saveLabel||'Fechar')+'</button></div>')+
+  '</div>';
+  document.body.style.overflow='hidden';
+}
+function refreshEditorBody(html){ const b=document.getElementById('editorBody'); if(b) b.innerHTML=html; }
+function commitEditor(){ if(!editorSave){ closeEditor(); return; } const ok=editorSave(); if(ok!==false){ closeEditor(); render(); } }
+function closeEditor(){ document.getElementById('overlayRoot').innerHTML=''; document.body.style.overflow=''; editorSave=null; }
+window.closeEditor=closeEditor; window.commitEditor=commitEditor;
+
+/* ===== UTIL ===== */
+function val(id){ const e=document.getElementById(id); return e? e.value.trim():''; }
+function emptyState(ic,t,s){ return '<div class="empty"><div class="big">'+ic+'</div><b>'+t+'</b><div class="small" style="margin-top:6px">'+s+'</div></div>'; }
+window.filters=filters; window.DB=DB; window.save=save; window.render=render; window.toast=toast;
+
+/* ===== ALARMS ===== */
+function checkAlarms(){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  const now=new Date();
+  DB.visitas.filter(v=>v.status==='Agendada' && !v.notified && v.data && v.hora).forEach(v=>{
+    const dt=new Date(v.data+'T'+v.hora); const trigger=new Date(dt.getTime()-(v.alarme||0)*60000);
+    if(now>=trigger && now<=dt){
+      new Notification('Visita técnica — '+v.cliente, {body:(v.endereco||'')+' · '+v.hora});
+      v.notified=true; save();
+    }
+  });
+}
+setInterval(checkAlarms, 30000);
+
+/* ===== INIT ===== */
+App.go('home');
+</script>
+</body>
+</html>
